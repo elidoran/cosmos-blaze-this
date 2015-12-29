@@ -29,7 +29,7 @@ Package.onTest(function(api) {
 });
 
 function uses(api) {
-  api.use(['coffeescript', 'templating', 'cosmos:blaze-profiles'], 'client')
+  api.use(['coffeescript', 'templating', 'cosmos:blaze-profiles@0.1.1'], 'client')
 
   api.addFiles('client/blaze-this.coffee', 'client');
 
