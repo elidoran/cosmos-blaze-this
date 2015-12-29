@@ -2,10 +2,15 @@
 
 Provides a consistent `this` to all *cosmos:blaze-profiles* functions.
 
-To get the template instance it's always available as: `this.template`.
-To get the data, non-reactively, it's always available as `this.data`.
+## Install
 
-The `this` has:
+```
+meteor add cosmos:blaze-this
+```
+
+## This
+
+The `this` always has:
 
 1. `template` - the template instance, `Blaze.Template.Instance`
 2. `data` - the current **non-reactive** data object
@@ -19,6 +24,9 @@ Conditionally has:
 3. `hash` - when it's a helper and an object is provided to the helper. The `hash` property is extracted from the `Spacebars.kw` argument and provided in the `this`; the `Spacebars.kw` object is removed from the args
 3. `subscribe` - when it's a lifecycle listener (created and rendered)
 4. `autorun` - when it's a lifecycle listener (created and rendered)
+
+
+## The Standard This (without blaze-this)
 
 Traditionally the `this` and other objects are done differently for different types. Describe:
 
@@ -51,7 +59,7 @@ Traditionally the `this` and other objects are done differently for different ty
 
 There is no additional API. It alters the inner workings of `cosmos:blaze-profiles` to call functions with the `this` described above.
 
-Well, then again, there's one function to explain which is available in the `this`:
+Well, there's one function to explain which is available in the `this`:
 
 ### getData(number)
 
@@ -66,3 +74,6 @@ So:
 * `getData(2)` = `Template.parentData(2)`
 * `getData(3)` = `Template.parentData(3)`
 * and so on...
+
+
+## MIT License
