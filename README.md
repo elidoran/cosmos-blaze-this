@@ -26,6 +26,33 @@ Conditionally has:
 4. `autorun` - when it's a lifecycle listener (created and rendered)
 
 
+## Usage
+
+The `this` will be as described above for all functions added via:
+
+1. `Template.profiles()`
+2. `Template.helpers()`
+3. `Template.events()`
+4. `Template.onCreated()`
+5. `Template.onRendered()`
+6. `Template.onDestroyed()`
+7. `Template.functions()`
+
+For example:
+
+```coffeescript
+Template.onCreated
+  assignObject: ->
+    object = SomeCollection.findOne this.data.objectId
+    this.template.$myObject = object
+
+Template.helpers
+  name: -> this.template.$myObject.name
+
+Template.onDestroyed
+  removeObject: -> delete this.template.$myObject
+```
+
 ## The Standard This (without blaze-this)
 
 Traditionally the `this` and other objects are done differently for different types. Describe:
