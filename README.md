@@ -12,10 +12,10 @@ meteor add cosmos:blaze-this
 
 The `this` always has:
 
-1. `template` - the template instance, `Blaze.Template.Instance`
+1. `template` - the template instance, `Blaze.TemplateInstance`
 2. `data` - the current **non-reactive** data object
 3. `getData` - **reactive** access to current data and parent data contexts
-4. `Template` - the `Blaze.Template` object, `Template.theName`
+4. `Template` - the `Blaze.Template` object, for example: `Template.theName`
 
 Conditionally has:
 
@@ -32,12 +32,12 @@ Traditionally the `this` and other objects are done differently for different ty
 
 1. Events:
 
-    * this = the current Blaze.TemplateInstance **data** context
+    * this = the current `Blaze.TemplateInstance` **data** context
     * event - the first function arg
     * template - the second function arg
     * data (non-reactive) = `this`
     * data (reactive) = `Template.currentData()` and `Template.parentData()`
-    * Template - template.view.template is the Blaze.Template
+    * Template - template.view.template is the `Blaze.Template`
 
 2. Helpers:
 
