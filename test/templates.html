@@ -1,0 +1,11 @@
+<body>
+{{> TestTemplate }}
+</body>
+
+<template name="TestTemplate">
+  {{> Template.dynamic template=theName data=theData }}
+</template>
+
+<template name="testthis">
+<p id="{{id}}">test this [{{helper1}}]</p>
+</template>
