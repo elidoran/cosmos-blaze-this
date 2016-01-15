@@ -1,3 +1,10 @@
+0.3.0 - Released 2015/01/15
+
+1. avoid assigning functions to the `this` which overwrite core functions
+2. enhanced `functions` to be on the `this` object instead of the `Blaze.TemplateInstance` so we can do `this.someFunction()` instead of `this.template.someFunction()`
+3. with the functions on the special `this` we maintain that `this` with `this.someFunction()` instead of doing `this.template.someFunction.call(this)`
+
+
 0.2.0 - Released 2015/01/15
 
 1. upgrade to cosmos:blaze-profiles@0.2.0 to fix/improve refs
