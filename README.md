@@ -2,7 +2,7 @@
 
 Provides a consistent `this` to all [cosmos:blaze-profiles](http://github.com/elidoran/cosmos-blaze-profiles) functions.
 
-Added options for all functions so this functionality requires specifying `this:true` in the options. That way, all existing use of the standard functions are not affected.
+Added options for all functions so this functionality requires specifying `this:true` in the options. Then, all existing uses of the standard functions are not affected.
 
 ## Install
 
@@ -24,8 +24,9 @@ Conditionally has:
 1. `event` - when it's an event listener
 2. `args` - when it's a helper, event listener, or a `functions` function receiving arguments
 3. `hash` - when it's a helper and an object is provided to the helper. The `hash` property is extracted from the `Spacebars.kw` argument and provided in the `this`; the `Spacebars.kw` object is removed from the args
-3. `subscribe` - when it's a lifecycle listener (created and rendered)
-4. `autorun` - when it's a lifecycle listener (created and rendered)
+4. `subscribe` - when it's a lifecycle listener (created and rendered)
+5. `autorun` - when it's a lifecycle listener (created and rendered)
+6. functions specified via the `template.functions()` function or an added profile
 
 
 ## Usage
