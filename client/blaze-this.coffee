@@ -2,6 +2,11 @@
 getData = (count = 0) -> Template.parentData count
 
 # build the new `this` based on the usual stuff and the options
+ILLEGAL_FN_NAMES = [
+  'template', 'Template', 'data', 'getData', 'autorun', 'subscribe',
+  'event', 'args', 'hash', '_isThat'
+]
+
 createThis = (options) ->
   that =
     template: options?.template ? Template.instance()
@@ -13,6 +18,13 @@ createThis = (options) ->
   if options?.autosub
     that.autorun = (fn) -> that.template.autorun fn
     that.subscribe = (args...) -> that.template.subscribe args...
+
+  # add functions to the `this`
+  if that.Template._thisFunctions?
+    for own name,fn of that.Template._thisFunctions
+      if name in ILLEGAL_FN_NAMES # TODO: allow silencing this
+        console.log 'Error, attempting to assign function to reserved name:',name
+      else that[name] = fn
 
   return that
 
@@ -69,7 +81,7 @@ wrapFns = (which, wrapOptions) ->
 # wrap a function and then call the previous implementation
 wrapFn = (which, wrapOptions) ->
   return (fn) ->
-    if typeof(fn) isnt 'function' and fn?.fn?
+    if ('function' isnt typeof(fn)) and fn?.fn?
       options = fn
       fn = options.fn
 
@@ -78,8 +90,8 @@ wrapFn = (which, wrapOptions) ->
     originals[which].call this, fn
     return
 
-# wrap functions when they are added to the profile, except event handlers:
-# instead, events are wrapped as they are added to a template instance,
+# wrap functions when they are added to the profile, except event handlers
+# instead, they're wrapped as they are added to a template instance,
 # because it completely overrides the Template::events function,
 # because that function does its own wrapping, so, instead of wrapping a
 # function to provide to Meteor which will then wrap it,
@@ -92,7 +104,8 @@ Template.profiles = (newProfiles) ->
         options = if groupType in ['onCreated', 'onRendered'] then autosub:true else undefined
         for own name,fn of group
           if typeof(fn) is 'function' and not fn.isWrapped
-            if groupType is 'events'
+            # these need to know because the 'this' option isn't available then
+            if groupType is 'events' or groupType is 'functions'
               fn.__wrapThis = true
             else
               group[name] = wrap fn, options
@@ -100,10 +113,33 @@ Template.profiles = (newProfiles) ->
 
 # new instance functions which wrap things before calling the other implementations
 Template::helpers     = wrapFns 'helpers'
-Template::functions   = wrapFns 'functions'
 Template::onCreated   = wrapFn 'onCreated', autosub:true
 Template::onRendered  = wrapFn 'onRendered', autosub:true
 Template::onDestroyed = wrapFn 'onDestroyed'
+
+Template::functions = (fns) ->
+  fns = Template._replaceReferences 'functions', fns
+
+  unwrapped = {}
+  doWrap = fns?.$options?.this
+
+  for own name,fn of fns when typeof(fn) is 'function'
+
+    # only wrap when told to
+    if doWrap or fn.__wrapThis and not (name in ILLEGAL_FN_NAMES)
+      # create place to store the functions
+      @_thisFunctions ?= {}
+
+      # store the wrapped function
+      @_thisFunctions[name] = if fn.isWrapped then fn else wrap fn
+
+    # else store it to send to the original `functions`
+    else unwrapped[name] = fn
+
+  # they don't want these wrapped, so, just call the original
+  originals.functions.call this, unwrapped
+
+  return
 
 # completely replace the function `events`. why have them do all this work to
 # call it with a different `this` then desired

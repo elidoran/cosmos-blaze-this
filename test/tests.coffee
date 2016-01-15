@@ -28,7 +28,10 @@ Tinytest.addAsync 'functions wrapped for special `this`', (test, done) ->
   test.isTrue profile.onCreated.blah?.isWrapped
   test.isTrue profile.onRendered.blah?.isWrapped
   test.isTrue profile.onDestroyed.blah?.isWrapped
-  test.isTrue profile.functions.$blah?.isWrapped
+
+  # functions/events are wrapped when called in the individual functions.
+  test.isFalse profile.functions.$blah?.isWrapped
+  test.isTrue Template.testthis._thisFunctions.$blah.isWrapped
 
   test.isFalse profile.events['click p']?.isWrapped
   test.isTrue Template.testthis.__eventMaps[0]['click p'].isWrapped
@@ -153,10 +156,103 @@ Tinytest.addAsync 'functions wrapped for special `this`', (test, done) ->
     # no way to run it without the this stuff
     test.isUndefined ran.function3
 
+  # cause the template to be created/rendered
   Template.TestTemplate.$TheName.set 'testthis'
 
   setTimeout (->
     $('#theId').click()
+    # cause the template to be destroyed
+    Template.TestTemplate.$TheName.set null
+    setTimeout (->
+      console.log 'the ran:',ran
+      try
+        testRan()
+      catch error
+        console.log 'Error processing testRan() :',error.stack
+      done()
+    ), 100
+  ), 100
+
+Tinytest.addAsync 'instance functions are bound to the this', (test, done) ->
+  console.log '\n\n\n\n\n'
+  ran = {}
+
+  Template.profiles
+    $options: this:true
+    TestFunctions:
+      helpers:
+        helper: ->
+          @$fn('some arg')
+          ran.helper = this
+          'helper1'
+      functions:
+        $fn: (arg) ->
+          ran.fn =
+            this: this
+            arg : arg
+        # disallowed names
+        Template: ->
+        template: ->
+        data: ->
+        getData: ->
+        args: ->
+        event: ->
+        _isThat: ->
+        hash: ->
+        autorun: ->
+        subscribe: ->
+
+  template = Template.TestFunctions
+
+  template.profiles [ 'TestFunctions' ]
+
+  template.functions
+    $options: this:true
+    $fn2: (arg) ->
+      ran.fn2 =
+        this: this
+        arg: arg
+
+  template.helpers
+    $options: this:true
+    helper2: -> @$fn2('some arg') ; ran.helper2 = this ; 'helper2'
+
+  template.functions
+    # no options for this:true so it works as in blaze-profiles
+    $fn3: (arg) ->
+      ran.fn3 =
+        this: this
+        arg: arg
+
+  template.helpers
+    $options: this:true
+    helper3: -> @template.$fn3('some arg') ; ran.helper3 = this ; 'helper3'
+
+  Template.TestTemplate.$TheName.set 'TestFunctions'
+
+  testRan = ->
+
+    # fn3 is normal, no this
+    test.isNotUndefined ran.fn3, 'ran should contain an `fn3`'
+    test.equal ran.fn3.arg, 'some arg'
+    test.isTrue (ran.fn3.this instanceof Blaze.TemplateInstance), 'fn3.this should be a template instance'
+    test.equal typeof(ran.fn3.this.$fn3), 'function', '$fn3 should be on the template instance instead'
+
+    test.isNotUndefined ran.fn, 'ran should contain an `fn`'
+    test.isNotUndefined ran.fn.this.$fn, 'fn `this` should have $fn'
+    test.isNotUndefined ran.fn.this.$fn2, 'fn `this` should have $fn2'
+    test.isUndefined ran.fn.this.$fn3, 'fn `this` should NOT have $fn3'
+    test.isNotUndefined ran.fn.this.template, 'fn `this` should have template'
+    test.isNotUndefined ran.fn.this.Template, 'fn `this` should have Template'
+    test.isNotUndefined ran.fn.this.args, 'fn `this` should have args'
+    test.equal ran.fn.this.args[0], 'some arg'
+    test.isNotUndefined ran.fn.this.data, 'fn `this` should have data'
+    test.isNotUndefined ran.fn.this.getData, 'fn `this` should have getData'
+
+    test.isNotUndefined ran.fn2, 'ran should contain an `fn2`'
+
+  setTimeout (->
+    # cause the template to be destroyed
     Template.TestTemplate.$TheName.set null
     setTimeout (->
       console.log 'the ran:',ran
