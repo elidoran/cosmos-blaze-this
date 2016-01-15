@@ -1,6 +1,6 @@
 Package.describe({
   name: 'cosmos:blaze-this',
-  version: '0.1.0',
+  version: '0.2.0',
   summary: 'Provide consistent this for all profile functions',
   git: 'http://github.com/elidoran/cosmos-blaze-this',
   documentation: 'README.md'
@@ -29,7 +29,7 @@ Package.onTest(function(api) {
 });
 
 function uses(api) {
-  api.use(['coffeescript', 'templating', 'cosmos:blaze-profiles@0.1.1'], 'client')
+  api.use(['coffeescript', 'templating', 'cosmos:blaze-profiles@0.2.0'], 'client')
 
   api.addFiles('client/blaze-this.coffee', 'client');
 
