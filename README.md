@@ -1,6 +1,8 @@
 # Cosmos Blaze This
 
-Provides a consistent `this` to all *cosmos:blaze-profiles* functions.
+Provides a consistent `this` to all [cosmos:blaze-profiles](http://github.com/elidoran/cosmos-blaze-profiles) functions.
+
+Added options for all functions so this functionality requires specifying `this:true` in the options. That way, all existing use of the standard functions are not affected.
 
 ## Install
 
@@ -41,16 +43,25 @@ The `this` will be as described above for all functions added via:
 For example:
 
 ```coffeescript
-Template.onCreated
-  assignObject: ->
+# instead of passing a function, pass an object which contains `this` and `fn`
+Template.onCreated this:true, fn: ->
     object = SomeCollection.findOne this.data.objectId
     this.template.$myObject = object
 
+# provide options with this:true as `$options`    
 Template.helpers
+  $options: this:true
   name: -> this.template.$myObject.name
 
-Template.onDestroyed
-  removeObject: -> delete this.template.$myObject
+# provide options with this:true as `$options`    
+Template.events
+  $options: this:true
+  name: -> this.template.$myObject.name
+
+  # instead of passing a function, pass an object which contains `this` and `fn`
+Template.onDestroyed this:true, fn: ->
+  delete this.template.$myObject
+
 ```
 
 ## The Standard This (without blaze-this)
